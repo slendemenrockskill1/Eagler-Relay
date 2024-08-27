@@ -1,0 +1,41 @@
+name: Java WebSocket Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'adoptopenjdk'
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dos2unix
+
+      - name: Convert run.sh to Unix format
+        run: dos2unix run.sh
+
+      - name: Make run.sh executable
+        run: chmod +x run.sh
+
+      - name: Build with Maven (if needed)
+        run: mvn clean install
+
+      - name: Run WebSocket Relay
+        run: |
+          nohup ./run.sh > relay.log 2>&1 &
